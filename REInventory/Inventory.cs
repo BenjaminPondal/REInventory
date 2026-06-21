@@ -1,7 +1,7 @@
 ﻿namespace REInventory;
 
 public class Inventory(Size gridSize) {
-    private readonly Dictionary<Item, Position> _items = new();
+    private readonly Dictionary<Item, Box> _items = [];
 
     private int TotalVolumeUsed() {
         return _items.ToList().Sum(posItemPair => posItemPair.Key.Size.Area);
@@ -9,6 +9,10 @@ public class Inventory(Size gridSize) {
 
     private int TotalVolume() {
         return gridSize.Area;
+    }
+
+    private bool CanFitBoundingBox(Box box) {
+        return !_items.Values.ToList().Any(otherBox => otherBox.OverlapsWith(box));
     }
 
     public bool HasFreeSpace() {
@@ -21,17 +25,13 @@ public class Inventory(Size gridSize) {
         var position = new Position(0, 0);
 
         for (var x = 0; x < gridSize.Width; x++)
-            if (!IsSlotOccupied(new Position(x, 0))) {
-                position = new Position(x, 0);
-                break;
-            }
+        for (var y = 0; y < gridSize.Height; y++) {
+            if (CanFitBoundingBox(new Box(position, item.Size))) break;
+            position = new Position(x, y);
+        }
 
-        _items.TryAdd(item, position);
+        _items.TryAdd(item, new Box(position, item.Size));
         return true;
-    }
-
-    private bool IsSlotOccupied(Position position) {
-        return _items.ContainsValue(position);
     }
 
     public bool HasSpaceFor(Item item) {
@@ -43,6 +43,6 @@ public class Inventory(Size gridSize) {
     }
 
     public Position GetPositionOf(Item item) {
-        return _items[item];
+        return _items[item].Offset;
     }
 }

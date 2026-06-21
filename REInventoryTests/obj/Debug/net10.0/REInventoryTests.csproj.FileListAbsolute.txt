@@ -158,3 +158,4 @@
 /mnt/HHD/RiderProjects/REInventory/REInventoryTests/bin/Debug/net10.0/CoverletSourceRootsMapping_REInventoryTests
 /mnt/HHD/RiderProjects/REInventory/REInventoryTests/bin/Debug/net10.0/REInventory.dll
 /mnt/HHD/RiderProjects/REInventory/REInventoryTests/bin/Debug/net10.0/REInventory.pdb
+/mnt/HHD/RiderProjects/REInventory/REInventoryTests/obj/Debug/net10.0/REInventoryTests.sourcelink.json

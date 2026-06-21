@@ -72,7 +72,7 @@ public class InventoryTests {
     }
 
     [Test]
-    public void GivenEmptyInventory_AddingAnItem_PlacesItAtFirstFreeSpace() {
+    public void GivenEmptyInventory_AddingAnItem_PlacesItAtFirstFreeSpaceStartingAtTopLeft() {
         var inventory = new Inventory(new Size(2, 2));
 
         inventory.AddItem(_greenHerb);

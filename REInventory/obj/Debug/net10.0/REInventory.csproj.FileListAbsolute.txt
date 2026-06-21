@@ -9,3 +9,4 @@
 /mnt/HHD/RiderProjects/REInventory/REInventory/obj/Debug/net10.0/refint/REInventory.dll
 /mnt/HHD/RiderProjects/REInventory/REInventory/obj/Debug/net10.0/REInventory.pdb
 /mnt/HHD/RiderProjects/REInventory/REInventory/obj/Debug/net10.0/ref/REInventory.dll
+/mnt/HHD/RiderProjects/REInventory/REInventory/obj/Debug/net10.0/REInventory.sourcelink.json

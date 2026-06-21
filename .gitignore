@@ -1,0 +1,53 @@
+# ==========================================
+# JetBrains Rider / ReSharper
+# ==========================================
+# Ignore the workspace and personal settings folder
+.idea/
+
+# Ignore personal configuration files
+*.DotSettings.user
+*.sln.iml
+*.csproj.user
+*.resharper.user
+
+# ==========================================
+# .NET / C# Build Folders
+# ==========================================
+# Ignore compiled output and temporary build files
+[Bb]in/
+[Oo]bj/
+[Tt]estResults/
+
+# ==========================================
+# Visual Studio (Safeguard for other devs)
+# ==========================================
+.vs/
+*.suo
+*.user
+
+# ==========================================
+# OS Generated Files
+# ==========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ==========================================
+# Unity Engine (Uncomment if moving to Unity)
+# ==========================================
+# /[Ll]ibrary/
+# /[Tt]emp/
+# /[Bb]uild/
+# /[Bb]uilds/
+# /[Ll]ogs/
+# /[Mm]emoryCaptures/
+# /[Uu]serSettings/
+# *.unityproj
+# *.sln
+# *.csproj

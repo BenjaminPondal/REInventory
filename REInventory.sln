@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REInventoryTests", "REInventoryTests\REInventoryTests.csproj", "{956BA49A-8133-40FB-B2E0-8D88A5948F0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REInventory", "REInventory\REInventory.csproj", "{1E757877-BB64-4478-85FC-222EC53B5A72}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{956BA49A-8133-40FB-B2E0-8D88A5948F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{956BA49A-8133-40FB-B2E0-8D88A5948F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{956BA49A-8133-40FB-B2E0-8D88A5948F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{956BA49A-8133-40FB-B2E0-8D88A5948F0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E757877-BB64-4478-85FC-222EC53B5A72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E757877-BB64-4478-85FC-222EC53B5A72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E757877-BB64-4478-85FC-222EC53B5A72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E757877-BB64-4478-85FC-222EC53B5A72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,10 +1,16 @@
-﻿namespace REInventory;
+﻿using REInventory.Primitives;
+
+namespace REInventory;
 
 public class Inventory(Size gridSize) {
-    private readonly Dictionary<Item, Box> _items = [];
+    private readonly List<PlacedItem> _items = [];
+
+    public Inventory(Size size, List<PlacedItem> items) : this(size) {
+        _items = items.ToList();
+    }
 
     private int TotalVolumeUsed() {
-        return _items.ToList().Sum(posItemPair => posItemPair.Key.Size.Area);
+        return _items.Sum(placedItem => placedItem.Item.Size.Area);
     }
 
     private int TotalVolume() {
@@ -12,7 +18,20 @@ public class Inventory(Size gridSize) {
     }
 
     private bool CanFitBoundingBox(Box box) {
-        return !_items.Values.ToList().Any(otherBox => otherBox.OverlapsWith(box));
+        return new Box(Position.Zero, gridSize).Contains(box) &&
+               !_items.Any(otherPlacedItem => otherPlacedItem.Box.OverlapsWith(box));
+    }
+
+    private Position? FindFreePosition(Size size) {
+        for (var y = 0; y < gridSize.Height; y++)
+        for (var x = 0; x < gridSize.Width; x++) {
+            var currentPosition = new Position(x, y);
+
+            if (CanFitBoundingBox(new Box(currentPosition, size)))
+                return currentPosition;
+        }
+
+        return null;
     }
 
     public bool HasFreeSpace() {
@@ -22,15 +41,16 @@ public class Inventory(Size gridSize) {
     public bool AddItem(Item item) {
         if (!HasSpaceFor(item)) return false;
 
-        var position = new Position(0, 0);
+        var placement = FindFreePosition(item.Size);
 
-        for (var x = 0; x < gridSize.Width; x++)
-        for (var y = 0; y < gridSize.Height; y++) {
-            if (CanFitBoundingBox(new Box(position, item.Size))) break;
-            position = new Position(x, y);
+        if (placement == null) {
+            item.Rotate90Degrees();
+            placement = FindFreePosition(item.Size);
         }
 
-        _items.TryAdd(item, new Box(position, item.Size));
+        if (placement == null) return false;
+
+        _items.Add(new PlacedItem(item, new Box(placement, item.Size)));
         return true;
     }
 
@@ -39,10 +59,16 @@ public class Inventory(Size gridSize) {
     }
 
     public bool Contains(Item item) {
-        return _items.ContainsKey(item);
+        return _items.Any(placedItem => placedItem.Item == item);
     }
 
-    public Position GetPositionOf(Item item) {
-        return _items[item].Offset;
+    public Position GetPivotOf(Item item) {
+        return _items.First(placedItem => placedItem.Item == item).Box.Offset;
     }
+
+    public List<PlacedItem> GetVisualElements() {
+        return _items.ToList();
+    }
+
+    public record PlacedItem(Item Item, Box Box);
 }

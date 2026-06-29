@@ -9,6 +9,8 @@ public class Inventory(Size gridSize) {
         _items = items.ToList();
     }
 
+    public PlacedItem? Selection { get; private set; }
+
     private int TotalVolumeUsed() {
         return _items.Sum(placedItem => placedItem.Item.Size.Area);
     }
@@ -70,5 +72,28 @@ public class Inventory(Size gridSize) {
         return _items.ToList();
     }
 
-    public record PlacedItem(Item Item, Box Box);
+    // TODO: Find better name
+    public void SwitchSelectionWithItemAt(Position position) {
+        var itemAtPosition = _items.FirstOrDefault(item => item.Box.Contains(position));
+
+        if (Selection != null && itemAtPosition == null) {
+            itemAtPosition = Selection.MoveTo(position);
+            if (!CanFitBoundingBox(itemAtPosition.Box)) return;
+
+            _items.Add(itemAtPosition);
+            Selection = null;
+            return;
+        }
+
+        if (itemAtPosition == null) return;
+
+        _items.Remove(itemAtPosition);
+        Selection = itemAtPosition;
+    }
+
+    public record PlacedItem(Item Item, Box Box) {
+        public PlacedItem MoveTo(Position position) {
+            return this with { Box = Box.TranslateTo(position) };
+        }
+    }
 }

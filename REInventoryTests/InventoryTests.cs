@@ -3,21 +3,35 @@
 namespace REInventory;
 
 public class InventoryTests {
+    private List<Inventory.PlacedItem> _collectionOfPlacedItems;
     private Inventory _emptyOneByOneInventory;
     private Inventory _emptyTwoByTwoInventory;
     private Item _greenHerb;
     private Item _gunpowder;
+    private Inventory _inventoryWithItems;
+    private Inventory.PlacedItem _placedGreenHerb;
+    private Inventory.PlacedItem _placedGunpowder;
     private Item _redHerb;
     private Item _shotgun;
 
     [SetUp]
     public void SetUp() {
-        _emptyOneByOneInventory = new Inventory(new Size(1, 1));
-        _emptyTwoByTwoInventory = new Inventory(new Size(2, 2));
         _greenHerb = new Item("Green Herb", new Size(1, 2));
         _redHerb = new Item("Red Herb", new Size(1, 2));
         _gunpowder = new Item("Gunpowder", new Size(1, 1));
         _shotgun = new Item("Shotgun", new Size(5, 2));
+
+        _placedGunpowder = new Inventory.PlacedItem(_gunpowder, new Box(Position.Zero, _gunpowder.Size));
+        _placedGreenHerb = new Inventory.PlacedItem(_greenHerb, new Box(new Position(0, 0), _greenHerb.Size));
+
+        _collectionOfPlacedItems = [
+            _placedGunpowder,
+            new Inventory.PlacedItem(new Item("Coin", new Size(1, 1)), new Box(new Position(1, 1), new Size(1, 1)))
+        ];
+
+        _emptyOneByOneInventory = new Inventory(new Size(1, 1));
+        _emptyTwoByTwoInventory = new Inventory(new Size(2, 2));
+        _inventoryWithItems = new Inventory(new Size(2, 2), _collectionOfPlacedItems);
     }
 
     [Test]
@@ -111,15 +125,64 @@ public class InventoryTests {
 
     [Test]
     public void GivenInventoryWithEnoughSpaceButWrongGeometry_CantAddItem() {
-        List<Inventory.PlacedItem> items = [
-            new(_gunpowder, new Box(Position.Zero, _gunpowder.Size)),
-            new(new Item("Coin", new Size(1, 1)), new Box(new Position(1, 1), new Size(1, 1)))
-        ];
-        var inventory = new Inventory(new Size(2, 2), items);
-
-        var success = inventory.AddItem(_greenHerb);
+        var success = _inventoryWithItems.AddItem(_greenHerb);
 
         Assert.That(success, Is.False);
-        Assert.That(inventory.Contains(_greenHerb), Is.False);
+        Assert.That(_inventoryWithItems.Contains(_greenHerb), Is.False);
+    }
+
+    [Test]
+    public void SelectingSlotWithoutItem_ShouldHaveNoSelection() {
+        _inventoryWithItems.SwitchSelectionWithItemAt(new Position(1, 0));
+
+        Assert.That(_inventoryWithItems.Selection, Is.Null);
+    }
+
+    [Test]
+    public void SelectingSlotWithItemPivot_ShouldHaveItemSelected() {
+        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero);
+
+        Assert.That(_inventoryWithItems.Selection, Is.EqualTo(_placedGunpowder));
+    }
+
+    [Test]
+    public void SelectingSlotInsideItemBoundingBox_ShouldHaveItemSelected() {
+        var inventory = new Inventory(new Size(2, 2), [_placedGreenHerb]);
+
+        inventory.SwitchSelectionWithItemAt(new Position(0, 1));
+
+        Assert.That(inventory.Selection, Is.EqualTo(_placedGreenHerb));
+    }
+
+    [Test]
+    public void SelectingItem_ShouldRemoveItemFromInventory() {
+        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero);
+
+        Assert.That(_inventoryWithItems.Contains(_placedGunpowder.Item), Is.False);
+    }
+
+    [Test]
+    public void GivenSelectedItem_SwitchingSelectionAtEmptySlotWithEnoughSpace_ShouldPlaceSelectedItem() {
+        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero); // Select first
+        _inventoryWithItems.SwitchSelectionWithItemAt(new Position(1, 0)); // Then drop
+
+        var newPlacedItem = new Inventory.PlacedItem(_gunpowder, new Box(new Position(1, 0), _gunpowder.Size));
+        Assert.That(_inventoryWithItems.GetVisualElements(), Contains.Item(newPlacedItem));
+        Assert.That(_inventoryWithItems.Selection, Is.Null);
+    }
+
+    [Test]
+    public void GivenSelectedItem_SwitchingSelectionAtEmptySlotWithNotEnoughSpace_ShouldNotPlaceSelectedItem() {
+        var inventory = new Inventory(new Size(2, 2),
+        [
+            _placedGreenHerb,
+            new Inventory.PlacedItem(new Item("Long Box", new Size(2, 1)), new Box(new Position(0, 1), new Size(2, 1)))
+        ]);
+
+        inventory.SwitchSelectionWithItemAt(Position.Zero); // Select first
+        inventory.SwitchSelectionWithItemAt(new Position(1, 0)); // Then drop
+
+        Assert.That(inventory.Contains(_placedGreenHerb.Item), Is.False);
+        Assert.That(inventory.Selection, Is.EqualTo(_placedGreenHerb));
     }
 }

@@ -12,4 +12,12 @@ public record Box(Position Offset, Size Size) {
     public bool Contains(Box other) {
         return HorizontalSpan.Contains(other.HorizontalSpan) && VerticalSpan.Contains(other.VerticalSpan);
     }
+
+    public bool Contains(Position point) {
+        return HorizontalSpan.ContainsWithExcludedEnd(point.X) && VerticalSpan.ContainsWithExcludedEnd(point.Y);
+    }
+
+    public Box TranslateTo(Position position) {
+        return this with { Offset = position, Size = Size };
+    }
 }

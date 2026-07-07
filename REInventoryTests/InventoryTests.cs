@@ -133,14 +133,14 @@ public class InventoryTests {
 
     [Test]
     public void SelectingSlotWithoutItem_ShouldHaveNoSelection() {
-        _inventoryWithItems.SwitchSelectionWithItemAt(new Position(1, 0));
+        _inventoryWithItems.SelectItemAt(new Position(1, 0));
 
         Assert.That(_inventoryWithItems.Selection, Is.Null);
     }
 
     [Test]
     public void SelectingSlotWithItemPivot_ShouldHaveItemSelected() {
-        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero);
+        _inventoryWithItems.SelectItemAt(Position.Zero);
 
         Assert.That(_inventoryWithItems.Selection, Is.EqualTo(_placedGunpowder));
     }
@@ -149,22 +149,28 @@ public class InventoryTests {
     public void SelectingSlotInsideItemBoundingBox_ShouldHaveItemSelected() {
         var inventory = new Inventory(new Size(2, 2), [_placedGreenHerb]);
 
-        inventory.SwitchSelectionWithItemAt(new Position(0, 1));
+        inventory.SelectItemAt(new Position(0, 1));
 
         Assert.That(inventory.Selection, Is.EqualTo(_placedGreenHerb));
     }
 
     [Test]
     public void SelectingItem_ShouldRemoveItemFromInventory() {
-        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero);
+        _inventoryWithItems.SelectItemAt(Position.Zero);
 
         Assert.That(_inventoryWithItems.Contains(_placedGunpowder.Item), Is.False);
     }
 
     [Test]
-    public void GivenSelectedItem_SwitchingSelectionAtEmptySlotWithEnoughSpace_ShouldPlaceSelectedItem() {
-        _inventoryWithItems.SwitchSelectionWithItemAt(Position.Zero); // Select first
-        _inventoryWithItems.SwitchSelectionWithItemAt(new Position(1, 0)); // Then drop
+    public void CannotDropItemWithNoSelection() {
+        var err = Assert.Throws<InvalidOperationException>(() => _inventoryWithItems.DropSelectionAt(Position.Zero));
+        Assert.That(err.Message, Is.EqualTo("Can't drop without a selection"));
+    }
+
+    [Test]
+    public void GivenSelectedItem_DroppingSelectionAtEmptySlotWithEnoughSpace_ShouldPlaceSelectedItem() {
+        _inventoryWithItems.SelectItemAt(Position.Zero);
+        _inventoryWithItems.DropSelectionAt(new Position(1, 0));
 
         var newPlacedItem = new Inventory.PlacedItem(_gunpowder, new Box(new Position(1, 0), _gunpowder.Size));
         Assert.That(_inventoryWithItems.GetVisualElements(), Contains.Item(newPlacedItem));
@@ -172,17 +178,50 @@ public class InventoryTests {
     }
 
     [Test]
-    public void GivenSelectedItem_SwitchingSelectionAtEmptySlotWithNotEnoughSpace_ShouldNotPlaceSelectedItem() {
+    public void GivenSelectedItem_DroppingSelectionAtEmptySlotWithNotEnoughSpace_ShouldNotPlaceSelectedItem() {
         var inventory = new Inventory(new Size(2, 2),
         [
             _placedGreenHerb,
             new Inventory.PlacedItem(new Item("Long Box", new Size(2, 1)), new Box(new Position(0, 1), new Size(2, 1)))
         ]);
 
-        inventory.SwitchSelectionWithItemAt(Position.Zero); // Select first
-        inventory.SwitchSelectionWithItemAt(new Position(1, 0)); // Then drop
+        inventory.SelectItemAt(Position.Zero);
+        inventory.DropSelectionAt(new Position(1, 0));
 
         Assert.That(inventory.Contains(_placedGreenHerb.Item), Is.False);
         Assert.That(inventory.Selection, Is.EqualTo(_placedGreenHerb));
+    }
+
+    [Test]
+    public void GivenSelectedItem_DroppingSelectionWithASmallerItem_ShouldNotPlaceSelectedItem() {
+        var inventory = new Inventory(new Size(2, 2),
+        [
+            _placedGreenHerb,
+            new Inventory.PlacedItem(_gunpowder, new Box(new Position(1, 0), _gunpowder.Size))
+        ]);
+
+        inventory.SelectItemAt(Position.Zero);
+        inventory.DropSelectionAt(new Position(1, 0));
+
+        Assert.That(inventory.Contains(_placedGreenHerb.Item), Is.False);
+        Assert.That(inventory.Selection, Is.EqualTo(_placedGreenHerb));
+    }
+
+    [Test]
+    public void GivenSelectedItem_DroppingSelectionIntoSameSizeItem_ShouldSwitchItems() {
+        var placedRedHerb = new Inventory.PlacedItem(_redHerb, new Box(new Position(1, 0), _redHerb.Size));
+        var inventory = new Inventory(new Size(2, 2),
+        [
+            _placedGreenHerb,
+            placedRedHerb
+        ]);
+
+        inventory.SelectItemAt(Position.Zero);
+        inventory.DropSelectionAt(new Position(1, 0));
+
+        var expectedPlacedGreenHerb = _placedGreenHerb.MoveTo(new Position(1, 0));
+        Assert.That(inventory.GetItemAt(new Position(1, 0)), Is.EqualTo(expectedPlacedGreenHerb));
+        Assert.That(inventory.Contains(placedRedHerb.Item), Is.False);
+        Assert.That(inventory.Selection, Is.EqualTo(placedRedHerb));
     }
 }

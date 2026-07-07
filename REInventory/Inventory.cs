@@ -72,23 +72,37 @@ public class Inventory(Size gridSize) {
         return _items.ToList();
     }
 
-    // TODO: Find better name
-    public void SwitchSelectionWithItemAt(Position position) {
-        var itemAtPosition = _items.FirstOrDefault(item => item.Box.Contains(position));
+    public void SelectItemAt(Position position) {
+        var itemAtDesiredPosition = GetItemAt(position);
+        if (itemAtDesiredPosition == null) return;
 
-        if (Selection != null && itemAtPosition == null) {
-            itemAtPosition = Selection.MoveTo(position);
-            if (!CanFitBoundingBox(itemAtPosition.Box)) return;
+        _items.Remove(itemAtDesiredPosition);
+        Selection = itemAtDesiredPosition;
+    }
 
-            _items.Add(itemAtPosition);
-            Selection = null;
+    public void DropSelectionAt(Position position) {
+        if (Selection == null) throw new InvalidOperationException("Can't drop without a selection");
+
+        var itemAtDesiredPosition = GetItemAt(position);
+        var newItemPosition = Selection.MoveTo(position);
+
+        if (itemAtDesiredPosition != null) {
+            if (itemAtDesiredPosition.Box != newItemPosition.Box) return;
+
+            _items.Remove(itemAtDesiredPosition);
+            _items.Add(newItemPosition);
+            Selection = itemAtDesiredPosition;
             return;
         }
 
-        if (itemAtPosition == null) return;
+        if (!CanFitBoundingBox(newItemPosition.Box)) return;
 
-        _items.Remove(itemAtPosition);
-        Selection = itemAtPosition;
+        _items.Add(newItemPosition);
+        Selection = null;
+    }
+
+    public PlacedItem? GetItemAt(Position position) {
+        return _items.FirstOrDefault(item => item.Box.Contains(position));
     }
 
     public record PlacedItem(Item Item, Box Box) {
